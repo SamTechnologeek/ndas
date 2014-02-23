@@ -17,6 +17,11 @@
 #define PREPR       0x0003 /* preprocessor directive */
 #define COMMWHITE   0x0004 /* a valid comment or whitespace */
 
+/* different errors after checking for validness, note IN stands for invalid */
+#define IN_LABEL    0x0005
+#define IN_PREPR    0x0006
+#define IN_INSTR    0x0007
+
 /* delimiters for splitting the string */
 #define DELIM       " ,\t" /* either a space, a comma or a tab */
 

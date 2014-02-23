@@ -22,6 +22,8 @@ int tokenize(char *line, char **tokens)
 		/* it's a label.
 		 * we should check for its validness.
 		 * we could be tricked!
+		 * *invalid* characters inside a label definition:
+		 * ',' or ' ' or ':' or ';'
 		 */
 		/* TODO: check for label: label? LABEL : UNKNOWN */
 		
