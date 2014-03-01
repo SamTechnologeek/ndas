@@ -1,0 +1,4 @@
+<symbol>,<offset from bin section>
+bin:
+<word>,<word>,<word>:<undefined symbol>,<word>,<word,<word>,<word>,<word>,
+<word>;<preprocessor direcive>,<word>,<word>,<word>.
