@@ -13,4 +13,6 @@
 
 #define VERS	0.01
 
+#define MAX	1337 /* this is used as a maximum for anything */
+
 #endif /* def.h */

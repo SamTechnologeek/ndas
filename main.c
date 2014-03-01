@@ -10,10 +10,11 @@
 
 #include "opt.h"
 #include "def.h"
+#include "token.h"
 
 struct opt_t opts;
 
-void display_usage(void) 
+static void display_usage(void) 
 {
 	fprintf(stderr, 
 	"ndas - new dcpu-16 assembler, version %.2f\n", VERS);
@@ -30,23 +31,23 @@ void display_usage(void)
 	exit(0);
 }
 
-inline void display_version(void)
+inline static void display_version(void)
 {
 	fprintf(stdout, "ndas version: %.2f\n", VERS);
 	exit(0);
 }
 
-inline void suggest_help(void)
+inline static void suggest_help(void)
 {
 	fprintf(stderr, "ndas: type `ndas -h' for help\n");
 }
 
-inline void error(char *s) 
+inline static void error(char *s) 
 {
 	fprintf(stderr, "ndas: error: %s", s);
 }
 
-void exit_sas(void)
+void static exit_ndas(void)
 {
 	if(opts.specout == FALSE) {
 		if(opts.out != NULL) {
@@ -70,6 +71,10 @@ int main(int argc, char **argv)
 		{ "help", no_argument, NULL, 0 },
 		{ "version", no_argument, NULL, 0},
 	};
+	
+	int result;
+	char teststring[] = "SET A, 2\n";
+	char **tokens = NULL;
 
 	opts.filename = NULL;
 	opts.path = NULL;
@@ -156,6 +161,17 @@ int main(int argc, char **argv)
 		error("specified input file doesn't exist\n");
 		exit(1);
 	}
+	printf("line: '%s'\n", teststring);
+	result = tokenize(teststring, &tokens);
+	printf("result: %d\n", result);
+	if (tokens == NULL) {
+		printf("tokens is NULL\n");
+		return -1;
+	}
+	printf("token: %s\n", tokens[0]);
+	free(tokens[0]);
+	free(tokens);
 	
+	exit_ndas();
 	return 0;
 }

@@ -1,13 +1,19 @@
 CC=gcc
-OPT=-O3
+OPT=-g
 PROG=ndas
 
-all: main.o
-	@$(CC) -o $(PROG) main.o $(OPT)
+all: $(PROG)
+
+$(PROG): main.o token.o
+	@$(CC) -o $(PROG) main.o token.o $(OPT)
 	@echo " LINK $(PROG)"
 
-main.o: main.c opt.h def.h
+main.o: main.c opt.h def.h token.h
 	@$(CC) -c main.c $(OPT)
+	@echo " CC   $<"
+
+token.o: token.c def.h token.h
+	@$(CC) -c token.c $(OPT)
 	@echo " CC   $<"
 
 clean:

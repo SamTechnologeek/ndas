@@ -5,12 +5,78 @@
  */
 #include "token.h"
 
+static void lowercase(char *s)
+{
+	int i;
+	char c;
+	if (s == NULL) return;
+
+	for (i = 0; s[i]; ++i) {
+		c = tolower(s[i]);
+		s[i] = c;
+	}
+}
+
+/* we support both kinds of label syntax.
+ * 'label:' or ':label' it does not matter.
+ * also we must check for validity.
+ * non permitted characters are: ' ' and ',' and ':' and ';'
+ */
+static char *get_label(char *line, int size)
+{
+	static char label[MAX];
+	int i, j;
+
+	printf("inside get_label(...)\n");
+	/* we get to the start of the label */	
+	for (i = 0; i < size; ++i) {
+		if (line[i] == ' ' || line[i] == '\t') continue;
+		else break;
+	}
+	/* we get to the end of the label */
+	for (j = i; j < size; ++j) {
+		if (line[j] != ' ' && line[j] != '\t'
+			&& line[j] != '\n' && line[j] != EOF)
+			continue;
+		else break;
+	}
+	--j;
+	if (line[i] == ':' && line[j] != ':') {
+		printf("given label is NOTCH like\n");
+		/* it's notch label syntax */
+		++i;
+		++j;
+		strncpy(label, line + i, j - i);
+		/* the terminating null byte hasn't been placed */
+		label[(j - i) + 1] = '\0';
+		if (strchr(label, ' ') || strchr(label, ',') ||
+			strchr(label, ':') || strchr(label, ';'))
+			return NULL;
+		else return label;
+	} else if (line[i] != ':' && line[j] == ':') {
+		printf("given label is NORMAL like\n");
+		/* it's standard label syntax */
+		strncpy(label, line + i, j - i);
+		/* the terminating null byte hasn't been placed */
+		label[(j - i) + 1] = '\0';
+		if (strchr(label, ' ') || strchr(label, ',') ||
+			strchr(label, ':') || strchr(label, ';'))
+			return NULL;
+		else return label;
+	} else {
+		printf("BAKA!\n");
+		return NULL;
+	}
+}
+
 /* note: we should get a string in the form 'contents\n\0' */
-int tokenize(char *line, char **tokens)
+int tokenize(char *line, char ***tokens)
 {
 	int tokcount = 0;
-	int i;
+	int i, j;
 	int lsize;
+	char *label;
+	char *token;
 	
 	if (line == NULL) return UNKNOWN;
 	lsize = strlen(line);
@@ -18,15 +84,34 @@ int tokenize(char *line, char **tokens)
 		if (line[i] == ' ' || line[i] == '\t') continue;
 		else break;
 	}
-	if (line[i] == ':') {
+	for (j = i; j < lsize; ++j) {
+		if (line[j] != ' ' && line[j] != '\t'
+			&& line[j] != '\n') continue;
+		else break;
+	}
+	--j;
+	if (line[i] == '\n') {
+		/* it's just blank */
+		return COMMWHITE;
+	} else if (line[i] == ':' || line[j] == ':') {
 		/* it's a label.
 		 * we should check for its validness.
 		 * we could be tricked!
 		 * *invalid* characters inside a label definition:
 		 * ',' or ' ' or ':' or ';'
 		 */
-		/* TODO: check for label: label? LABEL : UNKNOWN */
-		
+		label = get_label(line, lsize);	
+		if (!label) return IN_LABEL;
+		*tokens = malloc(sizeof (char*));
+		if (!*tokens) {
+			return MEM_ERROR;
+		}
+		*tokens[0] = malloc(sizeof (char) * strlen(label));
+		if (!*tokens[0]) {
+			free(*tokens);
+			return MEM_ERROR;
+		}
+		strcpy(*tokens[0], label);
 		return LABEL;
 	} else if (line[i] == '.') {
 		/* it's a preprocessor directive.
@@ -52,18 +137,7 @@ int tokenize(char *line, char **tokens)
 		 * we have been trolled.
 		 */
 		/* TODO: INSTR? INSTR : UNKNOWN */
+			
 		return INSTR;
 	}
-}
-	
-void lowercase(char *s)
-{
-	int i;
-	char c;
-	if (s == NULL) return;
-
-	for (i = 0; s[i]; ++i) {
-		c = tolower(s[i]);
-		s[i] = c;
-	}
-}
+}	
