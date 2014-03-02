@@ -52,6 +52,7 @@ void static exit_ndas(void)
 	if(opts.specout == FALSE) {
 		if(opts.out != NULL) {
 			free(opts.out);
+			opts.out = NULL;
 		}
 	}
 }
@@ -75,8 +76,9 @@ int main(int argc, char **argv)
 	int result;
 	char teststring[] = "                .equ MAX 1337 ;comment\n";
 	char teststring2[] = "\t:label\n";
-	char teststring3[] = "\tSET\tA, 2  ; for 32 shift\n";
+	char teststring3[] = "\tJSR\tabs  ; for 32 shift\n";
 	struct TOKENS tokens = { .data = NULL, .size = 0};
+	char line[MAX];
 
 	opts.filename = NULL;
 	opts.path = NULL;
@@ -138,8 +140,7 @@ int main(int argc, char **argv)
 	}
 
 	if(opts.specout == FALSE) {
-		for(i = 0; defout[i] != 0; ++i);
-		opts.out = malloc(i * sizeof (char)); 
+		opts.out = malloc(sizeof (char) * strlen(defout) + 1); 
 		if(opts.out == NULL) {
 			error("Out of memory\n");
 			exit(1);
@@ -163,7 +164,31 @@ int main(int argc, char **argv)
 		error("specified input file doesn't exist\n");
 		exit(1);
 	}
-	printf("line: '%s'\n", teststring3);
+
+	while (fgets(line, MAX, asmfile)) {
+		result = tokenize(line, &tokens);
+		printf("type: %d\n", result);
+		printf("tokens n: %d\n", tokens.size);
+		if (tokens.data != NULL) {
+			printf("%p\n", tokens.data);
+			for (i = 0; i < tokens.size; ++i) {
+				printf(" %s ", tokens.data[i]);
+			}
+			printf("\n");
+			for (i = 0; i < tokens.size; ++i) {
+				if (tokens.data[i] != NULL) {
+					printf("%p\n", tokens.data[i]);
+					free(tokens.data[i]);
+					tokens.data[i] = NULL;
+				}
+			}
+			free(tokens.data);
+			tokens.data = NULL;
+			tokens.size = 0;	
+		}
+	}
+	
+	/*printf("line: '%s'\n", teststring3);
 	result = tokenize(teststring3, &tokens);
 	printf("statement type: %d\n", result);
 	printf("tokens size: %d\n", tokens.size);
@@ -178,8 +203,9 @@ int main(int argc, char **argv)
 	} else {
 		printf("tokens.data is NULL.\n");
 		return -1;
-	}
-	
+	}*/
+
+	fclose(asmfile);	
 	exit_ndas();
 	return 0;
 }
