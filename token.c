@@ -70,13 +70,15 @@ static char *get_label(char *line, int size)
 }
 
 /* note: we should get a string in the form 'contents\n\0' */
-int tokenize(char *line, char ***tokens)
+int tokenize(char *line, struct TOKENS *tokens)
 {
 	int tokcount = 0;
 	int i, j;
 	int lsize;
 	char *label;
+	char dirct[MAX];
 	char *token;
+	char **m_data;
 	
 	if (line == NULL) return UNKNOWN;
 	lsize = strlen(line);
@@ -90,7 +92,7 @@ int tokenize(char *line, char ***tokens)
 		else break;
 	}
 	--j;
-	if (line[i] == '\n') {
+	if (line[i] == '\n' || line[i] == EOF) {
 		/* it's just blank */
 		return COMMWHITE;
 	} else if (line[i] == ':' || line[j] == ':') {
@@ -102,16 +104,17 @@ int tokenize(char *line, char ***tokens)
 		 */
 		label = get_label(line, lsize);	
 		if (!label) return IN_LABEL;
-		*tokens = malloc(sizeof (char*));
-		if (!*tokens) {
+		tokens->data = malloc(sizeof (char*));
+		if (!tokens->data) {
 			return MEM_ERROR;
 		}
-		*tokens[0] = malloc(sizeof (char) * strlen(label));
-		if (!*tokens[0]) {
-			free(*tokens);
+		tokens->data[0] = malloc(sizeof (char) * strlen(label));
+		if (!tokens->data[0]) {
+			free(tokens);
 			return MEM_ERROR;
 		}
-		strcpy(*tokens[0], label);
+		tokens->size = 1;	
+		strcpy(tokens->data[0], label);
 		return LABEL;
 	} else if (line[i] == '.') {
 		/* it's a preprocessor directive.
@@ -119,6 +122,43 @@ int tokenize(char *line, char ***tokens)
 		 * we could be tricked like with the label!
 		 */
 		/* TODO: check for directive: directive? PREPR : UNKNOWN */
+		
+		printf("directive. i: %d  size: %d\n", i, lsize);
+		for (j = i; j < lsize; ++j) {
+			if (line[j] != '\n' && line[j] != EOF
+				&& line[j] != ';') continue;
+			else break;
+		}
+		strncpy(dirct, line + i + 1, --j - i);
+		dirct[(j - i)] = '\0';
+		printf("directive: '%s'\n", dirct);	
+
+		tokens->data = malloc(sizeof (char *));
+		if (!tokens->data) return MEM_ERROR;
+		token = strtok(dirct, PREP_DELIM);
+		if (!token) {
+			printf("What the hell. 1st token is NULL.\n");
+			free(tokens->data);
+			return UNKNOWN;
+		}
+		tokens->size = 1;
+		tokens->data[0] = malloc(sizeof (char) * strlen(token));	
+		strcpy(tokens->data[0], token);
+		while ((token = strtok(NULL, PREP_DELIM)) != NULL) { 
+			tokens->size++;
+			printf("tokenize: tokens->size: %d\n", tokens->size);
+			m_data = realloc(tokens->data,
+				tokens->size * sizeof (char));
+			if (!m_data) {
+				printf("realloc() failed.\n");
+				return UNKNOWN;
+			}
+			tokens->data = m_data;
+			tokens->data[tokens->size - 1] =
+					malloc(sizeof (char) * strlen(token));
+			strcpy(tokens->data[tokens->size - 1], token);
+		}
+
 		return PREPR;
 	} else if (line[i] == ';' || line[i] == '\n') {
 		/* it's a comment or blank line.

@@ -73,8 +73,9 @@ int main(int argc, char **argv)
 	};
 	
 	int result;
-	char teststring[] = "SET A, 2\n";
-	char **tokens = NULL;
+	char teststring[] = "                .equ MAX 1337 ;comment\n";
+	char teststring2[] = "\t:label\n";
+	struct TOKENS tokens = { .data = NULL, .size = 0};
 
 	opts.filename = NULL;
 	opts.path = NULL;
@@ -164,13 +165,19 @@ int main(int argc, char **argv)
 	printf("line: '%s'\n", teststring);
 	result = tokenize(teststring, &tokens);
 	printf("result: %d\n", result);
-	if (tokens == NULL) {
-		printf("tokens is NULL\n");
+	printf("tokens size: %d\n", tokens.size);
+	if (tokens.data) {
+		for (i = 0; i < tokens.size; ++i) {
+			printf("token[%d]: '%s'\n", i, tokens.data[i]);
+		}
+		for (i = 0; i < tokens.size; ++i) {
+			free(tokens.data[i]);
+		}
+		free(tokens.data);
+	} else {
+		printf("tokens.data is NULL.\n");
 		return -1;
 	}
-	printf("token: %s\n", tokens[0]);
-	free(tokens[0]);
-	free(tokens);
 	
 	exit_ndas();
 	return 0;

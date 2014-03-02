@@ -65,7 +65,7 @@ sas also adds a preprocessor to its assembler, see `3. Preprocessor'.
 [.align <address>]
 
 	Pads the binary file with zeros continuosly until it reaches address 
-	[address]. (it pads [address] too)
+	[address]. It doesn't pad <address>.
 
 [.fill <length> <value>]
 

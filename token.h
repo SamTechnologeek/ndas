@@ -27,7 +27,13 @@
 #define MEM_ERROR	0x0008
 
 /* delimiters for splitting the string */
-#define DELIM       " ,\t" /* either a space, a comma or a tab */
+#define INST_DELIM    	" ,\t" /* either a space, a comma or a tab */
+#define PREP_DELIM	" \t"
+
+struct TOKENS {
+	char **data;
+	int size;
+};
 
 /*
  * takes a *line of the file and splits it to get the opcode and arguments
@@ -35,6 +41,6 @@
  * **tokens will be filled only if its a instruction, the linker will care
  * about LABELS and PREPROCESSOR DIRECTIVES.
  */
-int tokenize(char *line, char ***tokens);
+int tokenize(char *line, struct TOKENS *tokens);
 
 #endif /* TOKEN_H */
