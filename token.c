@@ -76,11 +76,12 @@ int tokenize(char *line, struct TOKENS *tokens)
 	int i, j;
 	int lsize;
 	char *label;
-	char dirct[MAX];
+	char exp[MAX];
 	char *token;
 	char **m_data;
 	
 	if (line == NULL) return UNKNOWN;
+	lowercase(line);
 	lsize = strlen(line);
 	for (i = 0; i < lsize; ++i) {
 		if (line[i] == ' ' || line[i] == '\t') continue;
@@ -121,21 +122,18 @@ int tokenize(char *line, struct TOKENS *tokens)
 		 * however we should check for its validness.
 		 * we could be tricked like with the label!
 		 */
-		/* TODO: check for directive: directive? PREPR : UNKNOWN */
 		
-		printf("directive. i: %d  size: %d\n", i, lsize);
 		for (j = i; j < lsize; ++j) {
 			if (line[j] != '\n' && line[j] != EOF
 				&& line[j] != ';') continue;
 			else break;
 		}
-		strncpy(dirct, line + i + 1, --j - i);
-		dirct[(j - i)] = '\0';
-		printf("directive: '%s'\n", dirct);	
+		strncpy(exp, line + i + 1, --j - i);
+		exp[(j - i)] = '\0';
 
 		tokens->data = malloc(sizeof (char *));
 		if (!tokens->data) return MEM_ERROR;
-		token = strtok(dirct, PREP_DELIM);
+		token = strtok(exp, PREP_DELIM);
 		if (!token) {
 			printf("What the hell. 1st token is NULL.\n");
 			free(tokens->data);
@@ -146,7 +144,6 @@ int tokenize(char *line, struct TOKENS *tokens)
 		strcpy(tokens->data[0], token);
 		while ((token = strtok(NULL, PREP_DELIM)) != NULL) { 
 			tokens->size++;
-			printf("tokenize: tokens->size: %d\n", tokens->size);
 			m_data = realloc(tokens->data,
 				tokens->size * sizeof (char));
 			if (!m_data) {
@@ -177,7 +174,40 @@ int tokenize(char *line, struct TOKENS *tokens)
 		 * we have been trolled.
 		 */
 		/* TODO: INSTR? INSTR : UNKNOWN */
-			
+		
+		for (j = i; j < lsize; ++j) {
+			if (line[j] != '\n' && line[j] != EOF
+				&& line[j] != ';') continue;
+			else break;
+		}
+		strncpy(exp, line + i, j - i);
+		exp[(j - i)] = '\0';
+
+		tokens->data = malloc(sizeof (char *));
+		if (!tokens->data) return MEM_ERROR;
+		token = strtok(exp, INST_DELIM);
+		if (!token) {
+			printf("What the hell. 1st token is NULL.\n");
+			free(tokens->data);
+			return UNKNOWN;
+		}
+		tokens->size = 1;
+		tokens->data[0] = malloc(sizeof (char) * strlen(token));	
+		strcpy(tokens->data[0], token);
+		while ((token = strtok(NULL, INST_DELIM)) != NULL) { 
+			tokens->size++;
+			m_data = realloc(tokens->data,
+				tokens->size * sizeof (char));
+			if (!m_data) {
+				printf("realloc() failed.\n");
+				return UNKNOWN;
+			}
+			tokens->data = m_data;
+			tokens->data[tokens->size - 1] =
+					malloc(sizeof (char) * strlen(token));
+			strcpy(tokens->data[tokens->size - 1], token);
+		}
+
 		return INSTR;
 	}
 }	

@@ -75,6 +75,7 @@ int main(int argc, char **argv)
 	int result;
 	char teststring[] = "                .equ MAX 1337 ;comment\n";
 	char teststring2[] = "\t:label\n";
+	char teststring3[] = "\tSET\tA, 2  ; for 32 shift\n";
 	struct TOKENS tokens = { .data = NULL, .size = 0};
 
 	opts.filename = NULL;
@@ -162,9 +163,9 @@ int main(int argc, char **argv)
 		error("specified input file doesn't exist\n");
 		exit(1);
 	}
-	printf("line: '%s'\n", teststring);
-	result = tokenize(teststring, &tokens);
-	printf("result: %d\n", result);
+	printf("line: '%s'\n", teststring3);
+	result = tokenize(teststring3, &tokens);
+	printf("statement type: %d\n", result);
 	printf("tokens size: %d\n", tokens.size);
 	if (tokens.data) {
 		for (i = 0; i < tokens.size; ++i) {
