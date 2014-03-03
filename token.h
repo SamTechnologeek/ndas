@@ -22,9 +22,7 @@
 
 /* different errors after checking for validness, note IN stands for invalid */
 #define IN_LABEL    	0x0005
-#define IN_PREPR    	0x0006
-#define IN_INSTR    	0x0007
-#define MEM_ERROR	0x0008
+#define MEM_ERROR	0x0006
 
 /* delimiters for splitting the string */
 #define INST_DELIM    	" ,\t" /* either a space, a comma or a tab */

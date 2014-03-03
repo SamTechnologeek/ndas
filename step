@@ -1,0 +1,9 @@
+open file.
+look for preprocessor includes.
+build up a file based on this.
+tokenize each line.
+generate binary based on this and leave labels and symbols apart.
+take care of all other preprocessor directives stored with a pointer.
+modify binary based on this.
+generate object format.
+end.

@@ -27,7 +27,6 @@ static char *get_label(char *line, int size)
 	static char label[MAX];
 	int i, j;
 
-	printf("inside get_label(...)\n");
 	/* we get to the start of the label */	
 	for (i = 0; i < size; ++i) {
 		if (line[i] == ' ' || line[i] == '\t') continue;
@@ -42,7 +41,6 @@ static char *get_label(char *line, int size)
 	}
 	--j;
 	if (line[i] == ':' && line[j] != ':') {
-		printf("given label is NOTCH like\n");
 		/* it's notch label syntax */
 		++i;
 		++j;
@@ -54,7 +52,6 @@ static char *get_label(char *line, int size)
 			return NULL;
 		else return label;
 	} else if (line[i] != ':' && line[j] == ':') {
-		printf("given label is NORMAL like\n");
 		/* it's standard label syntax */
 		strncpy(label, line + i, j - i);
 		/* the terminating null byte hasn't been placed */
@@ -72,7 +69,6 @@ static char *get_label(char *line, int size)
 /* note: we should get a string in the form 'contents\n\0' */
 int tokenize(char *line, struct TOKENS *tokens)
 {
-	int tokcount = 0;
 	int i = 0, j = 0;
 	int lsize = 0;
 	char *label = NULL;

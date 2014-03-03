@@ -1,4 +1,9 @@
-<symbol>,<offset from bin section>
+at the top there is a label = address table.
+on the bin section there is words recognizable because of the 0x start.
+refered to symbols recognizable because of the : start.
+preprocessor directives
+
+Example:
+<label>,<pointer>
 bin:
-<word>,<word>,<word>:<undefined symbol>,<word>,<word,<word>,<word>,<word>,
-<word>;<preprocessor direcive>,<word>,<word>,<word>.
+0xffff 0xffff 0xbeef 0x1234 :symbol 0xdeed 0xdaf7 ;equ-max-1337 0xffff

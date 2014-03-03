@@ -1,5 +1,5 @@
 CC=gcc
-OPT=-g
+OPT=-g -ansi 
 PROG=ndas
 
 all: $(PROG)

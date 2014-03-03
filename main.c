@@ -13,6 +13,7 @@
 #include "token.h"
 
 struct opt_t opts;
+WORD currword = 0x0000;
 
 static void display_usage(void) 
 {
@@ -31,23 +32,23 @@ static void display_usage(void)
 	exit(0);
 }
 
-inline static void display_version(void)
+static void display_version(void)
 {
 	fprintf(stdout, "ndas version: %.2f\n", VERS);
 	exit(0);
 }
 
-inline static void suggest_help(void)
+static void suggest_help(void)
 {
 	fprintf(stderr, "ndas: type `ndas -h' for help\n");
 }
 
-inline static void error(char *s) 
+static void error(char *s) 
 {
 	fprintf(stderr, "ndas: error: %s", s);
 }
 
-void static exit_ndas(void)
+static void exit_ndas(void)
 {
 	if(opts.specout == FALSE) {
 		if(opts.out != NULL) {
@@ -170,14 +171,12 @@ int main(int argc, char **argv)
 		printf("type: %d\n", result);
 		printf("tokens n: %d\n", tokens.size);
 		if (tokens.data != NULL) {
-			printf("%p\n", tokens.data);
 			for (i = 0; i < tokens.size; ++i) {
 				printf(" %s ", tokens.data[i]);
 			}
 			printf("\n");
 			for (i = 0; i < tokens.size; ++i) {
 				if (tokens.data[i] != NULL) {
-					printf("%p\n", tokens.data[i]);
 					free(tokens.data[i]);
 					tokens.data[i] = NULL;
 				}
@@ -188,23 +187,6 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	/*printf("line: '%s'\n", teststring3);
-	result = tokenize(teststring3, &tokens);
-	printf("statement type: %d\n", result);
-	printf("tokens size: %d\n", tokens.size);
-	if (tokens.data) {
-		for (i = 0; i < tokens.size; ++i) {
-			printf("token[%d]: '%s'\n", i, tokens.data[i]);
-		}
-		for (i = 0; i < tokens.size; ++i) {
-			free(tokens.data[i]);
-		}
-		free(tokens.data);
-	} else {
-		printf("tokens.data is NULL.\n");
-		return -1;
-	}*/
-
 	fclose(asmfile);	
 	exit_ndas();
 	return 0;

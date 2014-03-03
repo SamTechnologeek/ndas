@@ -7,6 +7,8 @@
 #ifndef DEF_H
 #define DEF_H
 
+#include <inttypes.h>
+
 /* global definitions */
 #define TRUE	1
 #define FALSE	0
@@ -14,5 +16,7 @@
 #define VERS	0.01
 
 #define MAX	1337 /* this is used as a maximum for anything */
+
+typedef uint16_t WORD;
 
 #endif /* def.h */
