@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include "def.h"
+#include "ndas.h"
 #include "opt.h"
+
+int yyparse(void);
+int yylex(void);
+extern FILE *yyin;
 
 struct opt_t opts;
 char defout[] = "a.o";
+int ndas_error = 0; /* if there is an error parsing the file, this is 1 */
 
 static void display_usage(void)
 {
@@ -116,5 +121,13 @@ int main(int argc, char **argv)
 	if (opts.obj_name_spec) printf("obj file: '%s'\n", opts.obj_fname);
 	else printf("obj file: '%s'\n", defout);
 
+	asmfile = fopen(opts.asm_fname, "r");
+	if (!asmfile) {
+		error("couldn't open file, does it exist?");
+		exit(EXIT_FAILURE);
+	}
+	yyin = asmfile;
+	yylex();
+	fclose(asmfile);
 	exit(EXIT_SUCCESS);
 }

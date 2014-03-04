@@ -1,17 +1,22 @@
 CC=gcc
-OPT=-Wall -ansi -g
-OUT=ndas
+CFLAGS=-c
+LDFLAGS=-lfl -ly
+SOURCES=ndas.c output.c lex.c
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=ndas
 
-all: $(OUT)
+all: $(SOURCES) $(EXECUTABLE)
 
-$(OUT): *.o
-	$(CC) -o $(OUT) *.o $(OPT)
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
-*.o: *.c
-	$(CC) -c *.c $(OPT)
+.c.o:
+	$(CC) $(CFLAGS) $< -o $@
 
-*.c: *.h
+%.lex.c: %.l
+	lex $<
 
 clean:
-	rm -f *.o
-	rm -f $(OUT)
+	rm -fv lex.c
+	rm -fv $(OBJECTS)
+	rm -fv $(EXECUTABLE)
