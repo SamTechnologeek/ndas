@@ -5,13 +5,14 @@
 
 #include "ndas.h"
 #include "opt.h"
+#include "tokens.h"
 
-int yyparse(void);
 int yylex(void);
 extern FILE *yyin;
 
 struct opt_t opts;
 char defout[] = "a.o";
+union value lvalue;
 int ndas_error = 0; /* if there is an error parsing the file, this is 1 */
 
 static void display_usage(void)
@@ -114,6 +115,7 @@ int main(int argc, char **argv)
 {
 	FILE *asmfile = NULL;
 	FILE *objfile = NULL;
+	int lexval;
 
 	handle_args(argc, argv);
 
@@ -127,7 +129,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	yyin = asmfile;
-	yylex();
+	while ((lexval = yylex()) != 0) {
+		printf("token value: %d  value: %d\n", lexval, lvalue.integer);
+	}
 	fclose(asmfile);
 	exit(EXIT_SUCCESS);
 }
