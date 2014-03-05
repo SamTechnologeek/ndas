@@ -47,7 +47,7 @@ int str2opcode(char *s)
 int str2reg(char *s)
 {
 	if (EQ(s, "a")) return DIR_A;
-	if (EQ(s, "b")) return DIR_A;
+	if (EQ(s, "b")) return DIR_B;
 	if (EQ(s, "c")) return DIR_C;
 	if (EQ(s, "x")) return DIR_X;
 	if (EQ(s, "y")) return DIR_Y;
