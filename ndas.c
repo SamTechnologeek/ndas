@@ -177,7 +177,6 @@ int main(int argc, char **argv)
 		}
 	}
 	exit:
-	printf("%d\n", opts.asm_fcount);
 	close_files(asmfiles, opts.asm_fcount);
 	opts_free();
 	exit(EXIT_SUCCESS);
