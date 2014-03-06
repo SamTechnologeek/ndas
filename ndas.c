@@ -11,7 +11,7 @@ int yylex(void);
 extern FILE *yyin;
 
 struct opt_t opts;
-char defout[] = "a.o";
+char defout[] = "a.bin";
 union value lvalue;
 int ndas_error = 0; /* if there is an error parsing the file, this is 1 */
 
@@ -19,10 +19,10 @@ static void display_usage(void)
 {
 	fprintf(stderr,
 	"ndas - new dcpu-16 assembler; version %.2f\n", VERS);
-	fprintf(stderr, "usage: ndas [options] asmfile\n");
+	fprintf(stderr, "usage: ndas [options] [asmfiles]\n");
 	fprintf(stderr, "options:\n");
 	fprintf(stderr,
-	"  -o outfile		write OF to outfile, default name is a.o\n");
+	"  -o outfile		write binary to outfile, default name is a.bin\n");
 	fprintf(stderr,
 	"  --version		display version number and exit\n");
 	fprintf(stderr,
@@ -44,11 +44,32 @@ static void error(char *s)
 	fprintf(stderr, "ndas: error: %s\n", s);
 }
 
+static void opts_free(void)
+{
+	opts.asm_fcount--;
+	for (; opts.asm_fcount >= 0; opts.asm_fcount--) {
+		if (opts.asm_fname[opts.asm_fcount] != NULL) {
+			free(opts.asm_fname[opts.asm_fcount]);
+			opts.asm_fname[opts.asm_fcount] = NULL;
+		}
+	}
+	free(opts.asm_fname);
+}
+
+static void close_files(FILE **asmfiles, int n)
+{
+	for (--n; n >= 0; --n) {
+		if (asmfiles[n]) fclose(asmfiles[n]);
+	}
+}
+
 static void handle_args(int argc, char **argv)
 {
 	char opt = 0;
 	int longind = 0;
 	int outcount = 0;
+	char **hdata = NULL;
+	char *asm_file = NULL;
 	static const char *optstring = "ho:";
 	static const struct option longopts[] = {
 		{"help", no_argument, NULL, 0},
@@ -56,8 +77,9 @@ static void handle_args(int argc, char **argv)
 	};
 
 	opts.asm_fname = NULL;
-	opts.obj_fname = NULL;
-	opts.obj_name_spec = 0;
+	opts.bin_fname = NULL;
+	opts.bin_name_spec = 0;
+	opts.asm_fcount = 0;
 
 	opt = getopt_long(argc, argv, optstring, longopts, &longind);
 
@@ -65,8 +87,8 @@ static void handle_args(int argc, char **argv)
 		switch (opt) {
 		case 'o':
 			if (outcount == 0) {
-				opts.obj_name_spec = 1;
-				opts.obj_fname = optarg;
+				opts.bin_name_spec = 1;
+				opts.bin_fname = optarg;
 				outcount++;
 			} else {
 				error("output file name already defined");
@@ -94,44 +116,69 @@ static void handle_args(int argc, char **argv)
 		opt = getopt_long(argc, argv, optstring, longopts, &longind);
 	}
 
-	if (optind < argc - 1) {
-		error("too many input files specified");
-		suggest_help();
-		exit(EXIT_FAILURE);
-	} else if (optind == argc) {
+	if (optind == argc) {
 		error("no input files specified");
 		suggest_help();
 		exit(EXIT_FAILURE);
 	} else {
-		opts.asm_fname = argv[optind];
+		while (optind < argc) {
+			hdata = realloc(opts.asm_fname, sizeof (char*) * (opts.asm_fcount + 1));
+			if (hdata == NULL) {
+				error("memory error.");
+				opts_free();
+				exit(EXIT_FAILURE);
+			}
+			opts.asm_fname = hdata;
+			opts.asm_fname[opts.asm_fcount] = malloc(sizeof (char) * strlen(argv[optind]) + 1);
+			if (opts.asm_fname[opts.asm_fcount] == NULL) {
+				error("memory error.");
+				opts_free();
+				exit(EXIT_FAILURE);
+			}
+			strcpy(opts.asm_fname[opts.asm_fcount], argv[optind]);
+			opts.asm_fcount++;
+			optind++;
+		}
 	}
 
-	if (opts.obj_name_spec == 0) {
-		opts.obj_fname = defout;
+	if (opts.bin_name_spec == 0) {
+		opts.bin_fname = defout;
 	}
 }
  
 int main(int argc, char **argv)
 {
-	FILE *asmfile = NULL;
-	FILE *objfile = NULL;
+	char errstr[MAX];
+	FILE* asmfiles[MAX];
+	FILE *binfile = NULL;
 	int lexval;
+	int i;
 
 	handle_args(argc, argv);
 
-	if (opts.asm_fname) printf("asm file: '%s'\n", opts.asm_fname);
-	if (opts.obj_name_spec) printf("obj file: '%s'\n", opts.obj_fname);
-	else printf("obj file: '%s'\n", defout);
+	for (i = 0; i < opts.asm_fcount; ++i) {
+		printf("asm file[%d]: '%s'\n", i + 1, opts.asm_fname[i]);
+		asmfiles[i] = fopen(opts.asm_fname[i], "r");
+		if (asmfiles[i] == NULL) {
+			sprintf(errstr, "couldn't open '%s'", opts.asm_fname[i]);
+			error(errstr);
+			error("perhaps it doesn't exist?");
+			close_files(asmfiles, i);
+			goto exit;
+		}
+	}
+	if (opts.bin_name_spec) printf("bin file: '%s'\n", opts.bin_fname);
+	else printf("bin file: '%s'\n", defout);
 
-	asmfile = fopen(opts.asm_fname, "r");
-	if (!asmfile) {
-		error("couldn't open file, does it exist?");
-		exit(EXIT_FAILURE);
+	for (i = 0; i < opts.asm_fcount; ++i) {
+		yyin = asmfiles[i];
+		while ((lexval = yylex()) != 0) {
+			printf("token value: %d  value: %d\n", lexval, lvalue.integer);
+		}
 	}
-	yyin = asmfile;
-	while ((lexval = yylex()) != 0) {
-		printf("token value: %d  value: %d\n", lexval, lvalue.integer);
-	}
-	fclose(asmfile);
+	exit:
+	printf("%d\n", opts.asm_fcount);
+	close_files(asmfiles, opts.asm_fcount);
+	opts_free();
 	exit(EXIT_SUCCESS);
 }

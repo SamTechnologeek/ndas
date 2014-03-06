@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-c
-LDFLAGS=-lfl -ly
+CFLAGS=-c -g
+LDFLAGS=-lfl -ly -g
 SOURCES=ndas.c output.c lex.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=ndas
@@ -14,7 +14,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 %.lex.c: %.l
-	lex $<
+	flex $<
 
 clean:
 	rm -fv lex.c
