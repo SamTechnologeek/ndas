@@ -6,6 +6,8 @@
 #include "ndas.h"
 #include "opt.h"
 #include "tokens.h"
+#include "output.h"
+#include "symbol.h"
 
 int yyparse(void);
 extern FILE *yyin;
@@ -79,7 +81,7 @@ static void handle_args(int argc, char **argv)
 	opts.asm_fname = NULL;
 	opts.bin_fname = NULL;
 	opts.bin_name_spec = 0;
-	opts.asm_fcount = 0;
+	opts.asm_fcount = 0;	
 
 	opt = getopt_long(argc, argv, optstring, longopts, &longind);
 
@@ -149,12 +151,17 @@ static void handle_args(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	char errstr[MAX];
+	char line[MAX];
 	FILE* asmfiles[MAX];
 	FILE *binfile = NULL;
 	int lexval;
 	int i;
 
+	currw = 0x0000;
+	symbols.i = 0;
+
 	handle_args(argc, argv);
+	memset(ram, 0x0000, RAM_SIZE);
 
 	for (i = 0; i < opts.asm_fcount; ++i) {
 		printf("asm file[%d]: '%s'\n", i + 1, opts.asm_fname[i]);
@@ -169,8 +176,12 @@ int main(int argc, char **argv)
 	}
 	if (opts.bin_name_spec) printf("bin file: '%s'\n", opts.bin_fname);
 	else printf("bin file: '%s'\n", defout);
-
+	int lines = 0;
 	for (i = 0; i < opts.asm_fcount; ++i) {
+/*		while(fgets(line, MAX, asmfiles[i]) != NULL) {
+			yyin = line;
+			yyparse();
+		}*/
 		yyin = asmfiles[i];
 		yyparse();
 	}

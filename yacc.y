@@ -1,5 +1,7 @@
 %{
 #include <stdio.h>
+#include "output.h"
+#include "symbol.h"
 int yylex();
 %}
 
@@ -13,13 +15,15 @@ int yylex();
 %token <integer> REG
 %token <integer> OP1 OP2
 
+%type <integer> symbol op_expr operand
+
 %defines "yacc.h"
 
 %%
 
 program:
-	program line '\n'			{ /*printf("line\n");*/ }
-	| program '\n'				/* empty line or comment */
+	program line '\n'		
+	| program '\n'			
 	| program error '\n'		{ yyerrok; }
 	|
 	;
@@ -31,7 +35,10 @@ line:
 	;							
 
 label:
-	LABEL						{ printf("label definition\n"); }
+	LABEL			{ 
+					printf("symbol: %s\n", yylval.string);
+					add_symbol(yylval.string, currw);
+				}
 	;
 
 statement:
@@ -49,20 +56,22 @@ operand:
 	;
 
 op_expr:
-	REG							{ printf("reg\n"); }
-	| expr						{ printf("expression\n"); }
-	| REG expr  /* PICK n */	{ printf("PICK n\n"); }
-	| expr '+' REG				{ printf("expr + reg\n"); }
-	| REG '+' expr				{ printf("reg + expr\n"); }
+	REG
+	| expr
+	| REG expr  /* PICK n */		{ 
+	| expr '+' REG		
+	| REG '+' expr		
 	;
 
 expr:
-	NUMBER						{ printf("number\n"); }
-	| symbol					{ printf("symbol\n"); }
+	NUMBER				
+	| symbol
 	;
 
 symbol:
-	SYMBOL						{ printf("SYMBOL I SAYYY\n"); }
+	SYMBOL				{ 
+						$$ = get_symbol(yylval.string, currw);	
+					}
 	;
 
 %%

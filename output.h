@@ -3,23 +3,17 @@
 
 #include <string.h>
 #include <strings.h>
+#include <stdlib.h>
 #include "ndas.h"
 
 #define EQ(a, b) (strcasecmp((a), (b)) == 0)
 
-typedef signed short s16;
-typedef unsigned short u16;
-
-typedef char* opcode;
-
-struct reg {
-	u16 value;
-	char *name;
-	int is_gp;
-};
+u16 ram[RAM_SIZE];
+u16 currw;
 
 int str2reg(char *s);
 int str2opcode(char *s);
+int str2num(char *s);
 
 #define NONBASIC 0x00
 #define SET      0x01

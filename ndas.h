@@ -1,10 +1,18 @@
 #ifndef DEF_H
 #define DEF_H
 
+#include <inttypes.h>
+
+typedef signed short s16;
+typedef unsigned short u16;
+typedef uint8_t u8;
+
 #define VERS	0.01
 
 #define ARRAY_SIZE(a) (sizeof (a) / sizeof (*a))
 #define MAX	1337
+
+#define RAM_SIZE	0xffff
 
 /* dcpu opcodes and registers */
 

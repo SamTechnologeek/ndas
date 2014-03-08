@@ -62,3 +62,9 @@ int str2reg(char *s)
 	if (EQ(s, "ex")) return DIR_EX;
 	return 0;
 }
+
+int str2num(char *s)
+{
+	return (int) strtol(s, NULL, 0);
+}
+	

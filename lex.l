@@ -1,7 +1,12 @@
 %{
 #include <stdio.h>
 #include "yacc.h"
+extern int ndas_error;
+int linecount = 0;
 %}
+
+%option noinput
+%option nounput
 
 ws			[ \t]
 letter		[A-Za-z]
@@ -19,25 +24,58 @@ op1_lc		jsr|hcf|int|rfi|ia[gsq]|hw[nqi]
 
 %%
 
-:{symbol}			{ return LABEL; }
-{symbol}:			{ return LABEL; }
-0x{hexdigit}+			{ return NUMBER; }
-{digit}+			{ return NUMBER; }
-{gpreg}|{xreg}			{ return REG; }
-{op2}|{op2_lc}			{ return OP2; }
-{op1}|{op1_lc}			{ return OP1; }
-{symbol}			{ return SYMBOL; }
-\"(\\.|[^\\"])*\"		{ return STRING; }
+:{symbol}			{ 
+					yylval.string = yytext + 1;
+					return LABEL;
+				}
+{symbol}:			{ 
+					yylval.string = yytext;
+					yytext[strlen(yytext) - 1] = '\0';
+					return LABEL;
+				}
+0x{hexdigit}+			{
+					yylval.integer = str2num(yytext);	
+					return NUMBER;
+				}
+{digit}+			{ 
+					yylval.integer = str2num(yytext);	
+					return NUMBER;
+				}
+{gpreg}|{xreg}			{ 
+					yylval.integer = str2reg(yytext);
+					return REG;
+				}
+{op2}|{op2_lc}			{ 
+					yylval.integer = str2opcode(yytext);
+					return OP2;
+				}
+{op1}|{op1_lc}			{ 
+					yylval.integer = str2opcode(yytext);
+					return OP1;
+				}
+{symbol}			{ 
+					yylval.string = yytext;
+					return SYMBOL;
+				}
+\"(\\.|[^\\"])*\"		{ 
+					yylval.string = yytext;
+					return STRING;
+				}
 
-[-,+*/|&^()~\[\]\n]	return *yytext;
+[,\+\[\]\n]				return *yytext;
 
-[ \t\r]+	;		/* ignore whitespace and DOS line endings */
-;.*			;		/* comment */
-.					printf("lex error\n");
+[ \t\r]+			; /* whitespace + DOS line endings */	
+;.*				; /* comment */
+.				{
+					fprintf(stderr, 
+					"error: line %d: unknown character %c\n",
+					linecount, *yytext);
+					ndas_error = 1;
+				}
 
 %%
 
 int yywrap(void)
 {
-	return -1;
+	return 1;
 }

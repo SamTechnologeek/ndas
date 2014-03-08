@@ -1,14 +1,14 @@
 CC=gcc
-CFLAGS=-c -g
+CFLAGS=-c -g -Wno-packed-bitfield-compat
 LDFLAGS=-lfl -ly -g
-SOURCES=ndas.c output.c lex.c yacc.c
+SOURCES=ndas.c output.c symbol.c lex.c yacc.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=ndas
 
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
