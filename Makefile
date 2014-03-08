@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-c -g
 LDFLAGS=-lfl -ly -g
-SOURCES=ndas.c output.c lex.c
+SOURCES=ndas.c output.c lex.c yacc.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=ndas
 
@@ -13,10 +13,15 @@ $(EXECUTABLE): $(OBJECTS)
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-%.lex.c: %.l
+%.yacc.c: %.y
+	bison -d $<
+
+%.lex.c: %.l yacc.h
 	flex $<
 
 clean:
 	rm -fv lex.c
+	rm -fv yacc.c
+	rm -fv yacc.h
 	rm -fv $(OBJECTS)
 	rm -fv $(EXECUTABLE)

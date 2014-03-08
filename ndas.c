@@ -7,7 +7,7 @@
 #include "opt.h"
 #include "tokens.h"
 
-int yylex(void);
+int yyparse(void);
 extern FILE *yyin;
 
 struct opt_t opts;
@@ -172,9 +172,7 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < opts.asm_fcount; ++i) {
 		yyin = asmfiles[i];
-		while ((lexval = yylex()) != 0) {
-			printf("token value: %d  value: %d\n", lexval, lvalue.integer);
-		}
+		yyparse();
 	}
 	exit:
 	close_files(asmfiles, opts.asm_fcount);
