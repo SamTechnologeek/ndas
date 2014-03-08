@@ -2,6 +2,7 @@
 #define SYMBOL_H
 
 #include <string.h>
+#include <stdio.h>
 #include "ndas.h"
 
 struct symbol {
@@ -15,12 +16,12 @@ struct usymbol {
 };
 
 struct symtable {
-	struct symbol data[MAX];
+	struct symbol data[BUFSIZ];
 	int i;
 };
 
 struct usymtable {
-	struct usymbol data[MAX];
+	struct usymbol data[BUFSIZ];
 	int i;
 };
 

@@ -150,9 +150,9 @@ static void handle_args(int argc, char **argv)
  
 int main(int argc, char **argv)
 {
-	char errstr[MAX];
-	char line[MAX];
-	FILE* asmfiles[MAX];
+	char errstr[BUFSIZ];
+	char line[BUFSIZ];
+	FILE* asmfiles[BUFSIZ];
 	FILE *binfile = NULL;
 	int lexval;
 	int i;
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 	else printf("bin file: '%s'\n", defout);
 	int lines = 0;
 	for (i = 0; i < opts.asm_fcount; ++i) {
-/*		while(fgets(line, MAX, asmfiles[i]) != NULL) {
+/*		while(fgets(line, BUFSIZ, asmfiles[i]) != NULL) {
 			yyin = line;
 			yyparse();
 		}*/

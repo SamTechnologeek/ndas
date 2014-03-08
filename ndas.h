@@ -10,7 +10,6 @@ typedef uint8_t u8;
 #define VERS	0.01
 
 #define ARRAY_SIZE(a) (sizeof (a) / sizeof (*a))
-#define MAX	1337
 
 #define RAM_SIZE	0xffff
 

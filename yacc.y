@@ -58,7 +58,7 @@ operand:
 op_expr:
 	REG
 	| expr
-	| REG expr  /* PICK n */		{ 
+	| REG expr  /* PICK n */		
 	| expr '+' REG		
 	| REG '+' expr		
 	;
